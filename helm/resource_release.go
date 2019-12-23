@@ -173,10 +173,10 @@ func resourceRelease() *schema.Resource {
 				},
 			},
 			"timeout": {
-				Type:        schema.TypeInt,
+				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     300,
-				Description: "Time in seconds to wait for any individual kubernetes operation.",
+				Default:     time.Duration(300*time.Second),
+				Description: "Time to wait for any individual Kubernetes operation (like Jobs for hooks). Defaults to `300s`",
 			},
 			"disable_webhooks": {
 				Type:        schema.TypeBool,
@@ -188,7 +188,7 @@ func resourceRelease() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: "Prevent CRD hooks from, running, but run other hooks.  See helm install --no-crd-hook",
+				Description: "Prevent CRD hooks from, running, but run other hooks. See helm install --no-crd-hook",
 			},
 			"reuse_values": {
 				Type:        schema.TypeBool,
@@ -400,7 +400,7 @@ func resourceReleaseCreate(d *schema.ResourceData, meta interface{}) error {
 	client.Wait = d.Get("wait").(bool)
 	client.Devel = d.Get("devel").(bool)
 	client.DependencyUpdate = updateDependency
-	client.Timeout = time.Duration(d.Get("timeout").(int)) * time.Second
+	client.Timeout = d.Get("timeout").(string)
 	client.Namespace = d.Get("namespace").(string)
 	client.ReleaseName = d.Get("name").(string)
 	client.GenerateName = false
@@ -457,7 +457,7 @@ func resourceReleaseUpdate(d *schema.ResourceData, meta interface{}) error {
 	client.ChartPathOptions = *cpo
 	client.Devel = d.Get("devel").(bool)
 	client.Namespace = d.Get("namespace").(string)
-	client.Timeout = time.Duration(d.Get("timeout").(int)) * time.Second
+	client.Timeout = d.Get("timeout").(string)
 	client.Wait = d.Get("wait").(bool)
 	client.DryRun = false
 	client.DisableHooks = d.Get("disable_webhooks").(bool)
